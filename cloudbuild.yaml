@@ -1,0 +1,4 @@
+steps:
+  # 第一步：只是打印一句话验证连接
+  - name: 'ubuntu'
+    args: ['echo', 'Hello Cloud Build from GitLab!']
