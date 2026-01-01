@@ -28,7 +28,7 @@ steps:
         fi
 
   # 2. 构建并推送前端镜像
-  - name: "gcr.io/cloud-builders/docker"
+  - name: "us-docker.pkg.dev/google-samples/containers/gke/helm"
     id: "build-frontend"
     entrypoint: "bash"
     args:
