@@ -60,7 +60,7 @@ steps:
         # 检查 backend || frontend || helm-chart 目录在当前 commit 中是否有变动
         if [ -n "$$BACKEND_CHANGED" ] || [ -n "$$FRONTEND_CHANGED" ] || [ -n "$$CHART_CHANGED" ]; then
           echo "Executing chart publish..."
-          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /workspace/yq && \
+          curl -L https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -o /workspace/yq && \
           chmod +x /workspace/yq && \
           cd ${_CHART_DIR} && \
           CHART_VERSION=$(/workspace/yq e '.version' Chart.yaml) && \
