@@ -1,19 +1,19 @@
 steps:
   # 获取完整的 Git 历史，确保 HEAD^ 可用
-  - name: 'gcr.io/cloud-builders/git'
-    id: 'unshallow'
-    entrypoint: 'bash'
+  - name: "gcr.io/cloud-builders/git"
+    id: "unshallow"
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         git fetch --unshallow || true
-  
+
   # 1. 构建并推送后端镜像
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'build-backend'
-    entrypoint: 'bash'
+  - name: "gcr.io/cloud-builders/docker"
+    id: "build-backend"
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         # 检查 backend 目录在当前 commit 中是否有变动
         if git diff --quiet HEAD^ HEAD -- ${_BACKEND_DIR}; then
@@ -22,17 +22,17 @@ steps:
           echo "Changes detected, starting backend build..."
           cd ${_BACKEND_DIR} && \
           docker build -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_BACKEND_NAME}:${SHORT_SHA} \
-                       -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_BACKEND_NAME}:latest . && \
+              -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_BACKEND_NAME}:latest . && \
           docker push ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_BACKEND_NAME}:${SHORT_SHA} && \
           docker push ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_BACKEND_NAME}:latest
         fi
 
   # 2. 构建并推送前端镜像
-  - name: 'gcr.io/cloud-builders/docker'
-    id: 'build-frontend'
-    entrypoint: 'bash'
+  - name: "gcr.io/cloud-builders/docker"
+    id: "build-frontend"
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         # 检查 frontend 目录在当前 commit 中是否有变动
         if git diff --quiet HEAD^ HEAD -- ${_FRONTEND_DIR}; then
@@ -41,17 +41,17 @@ steps:
           echo "Changes detected, starting frontend build..."
           cd ${_FRONTEND_DIR} && \
           docker build -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_FRONTEND_NAME}:${SHORT_SHA} \
-                       -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_FRONTEND_NAME}:latest . && \
+              -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_FRONTEND_NAME}:latest . && \
           docker push ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_FRONTEND_NAME}:${SHORT_SHA} && \
           docker push ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_FRONTEND_NAME}:latest
         fi
 
   # 3. 打包并推送 Helm Chart
-  - name: 'gcr.io/cloud-builders/helm'
-    id: 'publish-chart'
-    entrypoint: 'bash'
+  - name: "gcr.io/cloud-builders/helm:v3.12.0"
+    id: "publish-chart"
+    entrypoint: "bash"
     args:
-      - '-c'
+      - "-c"
       - |
         BACKEND_CHANGED=$(git diff --name-only HEAD^ HEAD | grep "^${_BACKEND_DIR}/" || true)
         FRONTEND_CHANGED=$(git diff --name-only HEAD^ HEAD | grep "^${_FRONTEND_DIR}/" || true)
