@@ -49,7 +49,7 @@ steps:
         CHART_CHANGED=$(git diff --name-only HEAD^ HEAD | grep "^${_CHART_DIR}/" || true)
 
         # 检查 backend || frontend || helm-chart 目录在当前 commit 中是否有变动
-        if [ -n "$BACKEND_CHANGED" ] || [ -n "$FRONTEND_CHANGED" ] || [ -n "$CHART_CHANGED" ]; then
+        if [ -n "$$BACKEND_CHANGED" ] || [ -n "$$FRONTEND_CHANGED" ] || [ -n "$$CHART_CHANGED" ]; then
           echo "Executing chart publish..."
           wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /workspace/yq && \
           chmod +x /workspace/yq && \
