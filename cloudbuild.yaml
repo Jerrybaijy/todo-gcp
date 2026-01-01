@@ -1,4 +1,13 @@
 steps:
+  # 获取完整的 Git 历史，确保 HEAD^ 可用
+  - name: 'gcr.io/cloud-builders/git'
+    id: 'unshallow'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        git fetch --unshallow || true
+  
   # 1. 构建并推送后端镜像
   - name: 'gcr.io/cloud-builders/docker'
     id: 'build-backend'
