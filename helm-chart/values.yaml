@@ -14,7 +14,7 @@ backend:
   ksaName: todo-ksa
   replicaCount: 2
   image:
-    repository: jerrybaijy/todo-gcp-backend
+    repository: asia-east2-docker.pkg.dev/project-60addf72-be9c-4c26-8db/todo-docker-repo/todo-gcp-backend
     tag: latest
     pullPolicy: Always
   service:
@@ -35,7 +35,7 @@ backend:
 frontend:
   replicaCount: 2
   image:
-    repository: jerrybaijy/todo-gcp-frontend
+    repository: asia-east2-docker.pkg.dev/project-60addf72-be9c-4c26-8db/todo-docker-repo/todo-gcp-frontend
     tag: latest
     pullPolicy: Always
   service:

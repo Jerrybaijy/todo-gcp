@@ -1,7 +1,79 @@
 steps:
-  # 第一步：只是打印一句话验证连接
-  - name: 'ubuntu'
-    args: ['echo', 'Hello Cloud Build from GitLab!']
+  # 1. 构建并推送后端镜像
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-backend'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # 检查 backend 目录在当前 commit 中是否有变动
+        if git diff --quiet HEAD^ HEAD -- ${_BACKEND_DIR}; then
+          echo "No changes in backend, skipping build."
+        else
+          echo "Changes detected, starting backend build..."
+          cd ${_BACKEND_DIR} && \
+          docker build -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_BACKEND_NAME}:${SHORT_SHA} \
+                       -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_BACKEND_NAME}:latest . && \
+          docker push ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_BACKEND_NAME}:${SHORT_SHA} && \
+          docker push ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_BACKEND_NAME}:latest
+        fi
+
+  # 2. 构建并推送前端镜像
+  - name: 'gcr.io/cloud-builders/docker'
+    id: 'build-frontend'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        # 检查 frontend 目录在当前 commit 中是否有变动
+        if git diff --quiet HEAD^ HEAD -- ${_FRONTEND_DIR}; then
+          echo "No changes in frontend, skipping build."
+        else
+          echo "Changes detected, starting frontend build..."
+          cd ${_FRONTEND_DIR} && \
+          docker build -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_FRONTEND_NAME}:${SHORT_SHA} \
+                       -t ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_FRONTEND_NAME}:latest . && \
+          docker push ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_FRONTEND_NAME}:${SHORT_SHA} && \
+          docker push ${_OCI_REGISTRY}/${_PROJECT_NAME}-${_FRONTEND_NAME}:latest
+        fi
+
+  # 3. 打包并推送 Helm Chart
+  - name: 'gcr.io/cloud-builders/gcloud'
+    id: 'publish-chart'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        BACKEND_CHANGED=$(git diff --name-only HEAD^ HEAD | grep "^${_BACKEND_DIR}/" || true)
+        FRONTEND_CHANGED=$(git diff --name-only HEAD^ HEAD | grep "^${_FRONTEND_DIR}/" || true)
+        CHART_CHANGED=$(git diff --name-only HEAD^ HEAD | grep "^${_CHART_DIR}/" || true)
+
+        # 检查 backend || frontend || helm-chart 目录在当前 commit 中是否有变动
+        if [ -n "$BACKEND_CHANGED" ] || [ -n "$FRONTEND_CHANGED" ] || [ -n "$CHART_CHANGED" ]; then
+          echo "Executing chart publish..."
+          wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /workspace/yq && \
+          chmod +x /workspace/yq && \
+          cd ${_CHART_DIR} && \
+          CHART_VERSION=$(/workspace/yq e '.version' Chart.yaml) && \
+          SHA_VERSION="$${CHART_VERSION}-${SHORT_SHA}" && \
+          LATEST_VERSION="99.99.99-latest" && \
+          helm package . --version "$${SHA_VERSION}" && \
+          helm package . --version "$${LATEST_VERSION}" && \
+          helm push ${_CHART_NAME}-$${SHA_VERSION}.tgz oci://${_OCI_REGISTRY} && \
+          helm push ${_CHART_NAME}-$${LATEST_VERSION}.tgz oci://${_OCI_REGISTRY}
+        else
+          echo "Nothing changed that requires a chart update."
+        fi
+
+substitutions:
+  _OCI_REGISTRY: asia-east2-docker.pkg.dev/project-60addf72-be9c-4c26-8db/todo-docker-repo
+  _PROJECT_NAME: todo-gcp
+  _BACKEND_NAME: backend
+  _FRONTEND_NAME: frontend
+  _BACKEND_DIR: backend
+  _FRONTEND_DIR: frontend
+  _CHART_NAME: todo-chart
+  _CHART_DIR: helm-chart
 
 options:
   logging: CLOUD_LOGGING_ONLY
