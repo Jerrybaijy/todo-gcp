@@ -7,7 +7,7 @@ spec:
   project: default
   source:
     # <oci-registry>/<chart-name>
-    repoURL: oci://registry.gitlab.com/jerrybai/todo-gcp/todo-chart
+    repoURL: oci://asia-east2-docker.pkg.dev/project-60addf72-be9c-4c26-8db/todo-docker-repo/todo-chart
     # Chart 版本号
     targetRevision: "99.99.99-latest"
     # Chart 名称
