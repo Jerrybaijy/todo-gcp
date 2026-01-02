@@ -47,7 +47,7 @@ steps:
         fi
 
   # 3. 打包并推送 Helm Chart
-  - name: "us-docker.pkg.dev/cloud-builders/helm"
+  - name: "us-docker.pkg.dev/cloud-builders/helm:3.13.3"
     id: "publish-chart"
     entrypoint: "bash"
     args:
