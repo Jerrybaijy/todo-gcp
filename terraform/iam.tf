@@ -7,7 +7,29 @@ resource "google_service_account" "workload_identity" {
   display_name = "GSA for Workload Identity"
 }
 
-# 创建 namespace，防止因 namespace 不存在而导致创建 IAM 失败
+# 为 GSA 分配多个角色
+resource "google_project_iam_member" "gsa_roles" {
+  for_each = toset([
+    "roles/cloudsql.client",         # Cloud SQL Client
+    "roles/artifactregistry.writer", # Artifact Registry Writer
+    "roles/artifactregistry.reader", # Artifact Registry Reader
+    "roles/logging.logWriter",       # Logs Writer
+  ])
+
+  project = var.project_id
+  role    = each.key
+  member  = "serviceAccount:${google_service_account.workload_identity.email}"
+}
+
+# 允许 argocd-repo-server KSA 以 GSA 身份运行
+resource "google_service_account_iam_member" "argocd_repo_server_binding" {
+  service_account_id = google_service_account.workload_identity.name
+  role               = "roles/iam.workloadIdentityUser"
+  # 注意：Argo CD 默认安装在 argocd 命名空间，KSA 名为 argocd-repo-server
+  member = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[argocd/argocd-repo-server]"
+}
+
+# 创建 namespace，防止因 namespace 不存在而导致创建 KSA 失败
 resource "kubernetes_namespace_v1" "app_ns" {
   metadata {
     name = local.app_ns
@@ -30,13 +52,6 @@ resource "google_service_account_iam_member" "workload_identity_binding" {
   service_account_id = google_service_account.workload_identity.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[${local.app_ns}/${local.ksa_name}]"
-}
-
-# 允许 GSA 访问 Cloud SQL
-resource "google_project_iam_member" "mysql_client" {
-  project = var.project_id
-  role    = "roles/cloudsql.client"
-  member  = "serviceAccount:${google_service_account.workload_identity.email}"
 }
 
 output "app_namespace" {
