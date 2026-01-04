@@ -21,15 +21,7 @@ resource "google_project_iam_member" "gsa_roles" {
   member  = "serviceAccount:${google_service_account.workload_identity.email}"
 }
 
-# 允许 argocd-repo-server KSA 以 GSA 身份运行
-resource "google_service_account_iam_member" "argocd_repo_server_binding" {
-  service_account_id = google_service_account.workload_identity.name
-  role               = "roles/iam.workloadIdentityUser"
-  # 注意：Argo CD 默认安装在 argocd 命名空间，KSA 名为 argocd-repo-server
-  member = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[argocd/argocd-repo-server]"
-}
-
-# 创建 namespace，防止因 namespace 不存在而导致创建 KSA 失败
+# 创建 app_ns，防止因 app_ns 不存在而导致创建 KSA 失败
 resource "kubernetes_namespace_v1" "app_ns" {
   metadata {
     name = local.app_ns
@@ -52,6 +44,13 @@ resource "google_service_account_iam_member" "workload_identity_binding" {
   service_account_id = google_service_account.workload_identity.name
   role               = "roles/iam.workloadIdentityUser"
   member             = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[${local.app_ns}/${local.ksa_name}]"
+}
+
+# 允许 argocd-repo-server SA 以 GSA 身份运行
+resource "google_service_account_iam_member" "argocd_repo_server_binding" {
+  service_account_id = google_service_account.workload_identity.name
+  role               = "roles/iam.workloadIdentityUser"
+  member = "serviceAccount:${data.google_project.project.project_id}.svc.id.goog[argocd/argocd-repo-server]"
 }
 
 output "app_namespace" {

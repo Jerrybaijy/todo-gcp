@@ -24,7 +24,7 @@ resource "helm_release" "argocd" {
   version    = "7.7.1"
 
   set = [
-    # 设置 argocd-repo-server 的 GSA 注解，以启用 Workload Identity
+    # 添加 argocd-repo-server 的 GSA 注解，以启用 Workload Identity
     {
       name  = "repoServer.serviceAccount.annotations.iam\\.gke\\.io/gcp-service-account"
       value = google_service_account.workload_identity.email
