@@ -6,16 +6,17 @@ variable "prefix" {
 }
 
 locals {
-  gke_name       = "${var.prefix}-cluster"
-  node_pool_name = "${var.prefix}-node-pool"
-  app_ns         = "${var.prefix}-ns"
-  sa_id          = "${var.prefix}-sa-id"
-  ksa_name       = "${var.prefix}-ksa"
-  db_instance    = "${var.prefix}-db-instance"
-  db_name        = "${var.prefix}_db"
-  app_name       = "${var.prefix}-app"
-  chart_name     = "${var.prefix}-chart"
-  chart_repo     = "${region}-docker.pkg.dev/${var.project_id}/${var.prefix}-docker-repo"
+  gke_name        = "${var.prefix}-cluster"
+  node_pool_name  = "${var.prefix}-node-pool"
+  app_ns          = "${var.prefix}-ns"
+  sa_id           = "${var.prefix}-sa-id"
+  ksa_name        = "${var.prefix}-ksa"
+  db_instance     = "${var.prefix}-db-instance"
+  db_name         = "${var.prefix}_db"
+  app_name        = "${var.prefix}-app"
+  chart_repo_name = "${var.prefix}-docker-repo"
+  chart_name      = "${var.prefix}-chart"
+  chart_repo_url  = "${var.region}-docker.pkg.dev/${var.project_id}/${local.chart_repo_name}"
 }
 
 # --- GCP ---
@@ -55,11 +56,4 @@ variable "my_external_ip" {
   type        = string
   description = "My external IP access to Argo CD"
   sensitive   = true
-}
-
-# --- Artifact Registry ---
-variable "gar_repo_name" {
-  type        = string
-  description = "GAR Repository Name"
-  default     = "todo-docker-repo"
 }

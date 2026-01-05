@@ -65,7 +65,7 @@ resource "kubernetes_secret_v1" "gar_repo_secret" {
   data = {
     name      = "todo-docker-repo"
     type      = "helm"
-    url       = "${var.region}-docker-pkg.dev/${var.project_id}/${var.gar_repo_name}"
+    url       = local.chart_repo_url
     enableOCI = "true"
   }
 }
