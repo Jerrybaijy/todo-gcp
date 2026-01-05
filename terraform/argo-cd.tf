@@ -48,6 +48,29 @@ resource "helm_release" "argocd" {
   depends_on = [google_service_account.workload_identity]
 }
 
+# 配置 argocd-cm ConfigMap，添加 GAR OCI 仓库
+resource "kubernetes_config_map" "argocd_cm" {
+  metadata {
+    name      = "argocd-cm"
+    namespace = kubernetes_namespace_v1.argocd_ns.metadata[0].name
+  }
+
+  data = {
+    "repositories" = <<EOT
+- name: gar-oci-helm-repo
+  type: helm
+  url: oci://${var.region}-docker.pkg.dev/${var.project_id}/${var.gar_repo_name}
+EOT
+  }
+
+  # 若 argocd-cm 已存在，合并配置而非覆盖
+  lifecycle {
+    ignore_changes = [
+      data,
+    ]
+  }
+}
+
 # 获取 Argo CD 服务数据 (用于 Output)
 data "kubernetes_service_v1" "argocd_server" {
   metadata {

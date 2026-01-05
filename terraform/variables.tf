@@ -47,6 +47,13 @@ variable "mysql_jerry_password" {
   sensitive   = true
 }
 
+# --- Artifact Registry ---
+variable "gar_repo_name" {
+  type        = string
+  description = "GAR Repository Name"
+  default     = "todo-docker-repo"
+}
+
 # --- Argo CD ---
 variable "my_external_ip" {
   type        = string

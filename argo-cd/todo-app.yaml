@@ -3,15 +3,13 @@ kind: Application
 metadata:
   name: todo-app
   namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    # GitLab Container Registry 地址
-    # repoURL: registry.gitlab.com/jerrybai/todo-fullstack
     repoURL: asia-east2-docker.pkg.dev/project-60addf72-be9c-4c26-8db/todo-docker-repo
-    # Chart 版本号
     targetRevision: "99.99.99-latest"
-    # Chart 名称
     chart: todo-chart
 
   destination:
@@ -22,7 +20,6 @@ spec:
       selfHeal: true
       prune: true
     syncOptions:
-      - CreateNamespace=true
       - ApplyOutOfSyncOnly=true
     retry:
       limit: 5
