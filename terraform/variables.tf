@@ -13,6 +13,9 @@ locals {
   ksa_name       = "${var.prefix}-ksa"
   db_instance    = "${var.prefix}-db-instance"
   db_name        = "${var.prefix}_db"
+  app_name       = "${var.prefix}-app"
+  chart_name     = "${var.prefix}-chart"
+  chart_repo     = "${region}-docker.pkg.dev/${var.project_id}/${var.prefix}-docker-repo"
 }
 
 # --- GCP ---

@@ -1,10 +1,11 @@
 locals {
   services = [
-    "compute.googleapis.com",        # Compute Engine API
-    "container.googleapis.com",      # Kubernetes Engine API
-    "iam.googleapis.com",            # IAM API
-    "iamcredentials.googleapis.com", # Workload Identity API
-    "sqladmin.googleapis.com"        # Cloud SQL API
+    "compute.googleapis.com",         # Compute Engine API
+    "container.googleapis.com",       # Kubernetes Engine API
+    "iam.googleapis.com",             # IAM API
+    "iamcredentials.googleapis.com",  # Workload Identity API
+    "sqladmin.googleapis.com",        # Cloud SQL API
+    "artifactregistry.googleapis.com" # Artifact Registry API
   ]
 }
 
