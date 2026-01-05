@@ -45,29 +45,28 @@ resource "helm_release" "argocd" {
       value = "{${var.my_external_ip}/32}"
     }
   ]
-  depends_on = [google_service_account.workload_identity]
+
+  depends_on = [
+    google_service_account.workload_identity,
+    google_service_account_iam_member.argocd_repo_server_binding
+  ]
 }
 
-# 配置 argocd-cm ConfigMap，添加 GAR OCI 仓库
-resource "kubernetes_config_map" "argocd_cm" {
+# 创建 Argo CD 访问 GAR 的 Secret
+resource "kubernetes_secret_v1" "gar_repo_secret" {
   metadata {
-    name      = "argocd-cm"
+    name      = "gar-repo-secret"
     namespace = kubernetes_namespace_v1.argocd_ns.metadata[0].name
+    labels = {
+      "argocd.argoproj.io/secret-type" = "repository"
+    }
   }
 
   data = {
-    "repositories" = <<EOT
-- name: gar-oci-helm-repo
-  type: helm
-  url: oci://${var.region}-docker.pkg.dev/${var.project_id}/${var.gar_repo_name}
-EOT
-  }
-
-  # 若 argocd-cm 已存在，合并配置而非覆盖
-  lifecycle {
-    ignore_changes = [
-      data,
-    ]
+    name      = "todo-docker-repo"
+    type      = "helm"
+    url       = "${var.region}-docker-pkg.dev/${var.project_id}/${var.gar_repo_name}"
+    enableOCI = "true"
   }
 }
 
