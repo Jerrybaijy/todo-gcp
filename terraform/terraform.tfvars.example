@@ -1,0 +1,10 @@
+# GitLab repo token
+gitlab_personal_access_token_api      = ""
+gitlab_personal_access_token_read_api = ""
+
+# Cloud SQL password
+mysql_root_password = ""
+mysql_jerry_password = ""
+
+# Argo CD management IP
+my_external_ip = ""
