@@ -126,9 +126,9 @@ todo-gcp/
 │   │
 │   ├── main.tf             # 根模块主文件
 │   ├── providers.tf        # 根模块 Provider 文件
-│   ├── variables.tf        # 根模块变量文件
-│   ├── variables.tfvars    # 根模块敏感变量赋值文件
-│   └── variables.tfvars.example # 根模块敏感变量赋值文件模板
+│   ├── terraform.tfvars    # 根模块敏感变量赋值文件
+│   ├── terraform.tfvars.example # 根模块敏感变量赋值文件模板
+│   └── variables.tf        # 根模块变量文件
 │
 ├── .env                    # 环境变量（未推送至代码仓库）
 ├── .env.example            # 环境变量示例文件
